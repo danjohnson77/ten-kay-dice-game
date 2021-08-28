@@ -11,6 +11,7 @@
     <div class="container">
       <div class="bank">
         <h2>Bank:</h2>
+        <p class="bank-score">0</p>
         <div class="bank-dice"></div>
       </div>
       <div class="dice">
@@ -237,7 +238,11 @@
           </ol>
         </div>
       </div>
-      <button class="btn-roll" onclick="handleRollClick()">ROLL DICE</button>
+      <div class="button-container">
+        <button class="btn-roll" onclick="handleRollClick()">ROLL DICE</button>
+        <button class="btn-end" disabled>END TURN</button>
+      </div>
+
       <div class="score-container">
         <h2>Score:</h2>
         <p class="score"></p>

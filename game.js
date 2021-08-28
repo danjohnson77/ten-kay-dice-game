@@ -1,5 +1,9 @@
 console.log("GAME IS ON");
 
+const state = {
+  bankScore: 0,
+};
+
 const handleRollClick = () => {
   resetDice();
 
@@ -7,9 +11,7 @@ const handleRollClick = () => {
 
   const result = rollDice(dice);
 
-  console.log("RESULT:", result);
-
-  processTurn(result);
+  prepareForInput(result);
 };
 
 const resetDice = () => {
@@ -38,7 +40,7 @@ const rollDice = (dice) => {
   });
 };
 
-const processTurn = async (result) => {
+const prepareForInput = (result) => {
   const scoringDie = evaluateRoll(result);
 
   highlightScoringDice(scoringDie);
@@ -85,12 +87,11 @@ const moveDice = (die) => {
   dice.removeChild(el);
 
   const dieForBank = createDieForBank(value);
-
+  addScoreToBank(value);
   bank.appendChild(dieForBank);
 };
 
 const createDieForBank = (value) => {
-  console.log("value", value);
   const dieForBank = document.createElement("div");
   dieForBank.classList.add("die-side");
 
@@ -103,6 +104,29 @@ const createDieForBank = (value) => {
   }
 
   return dieForBank;
+};
+
+const addScoreToBank = (value) => {
+  let { bankScore } = state;
+  let score = 0;
+  switch (value) {
+    case 1:
+      {
+        score = 100;
+      }
+      break;
+    case 5:
+      {
+        score = 50;
+      }
+      break;
+    default: {
+      score = 0;
+    }
+  }
+  console.log("score", score);
+  state.bankScore += score;
+  document.querySelector(".bank-score").innerHTML = state.bankScore;
 };
 
 const getNumber = (min, max) => {
