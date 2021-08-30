@@ -1,15 +1,56 @@
 console.log("GAME IS ON");
 
+const elements = {
+  diceContainer: document.querySelector(".dice-container"),
+  bankDice: document.querySelector(".bank-dice"),
+  bankScore: document.querySelector(".bank-score"),
+};
 const state = {
   bankScore: 0,
 };
 
+const isOdd = (num) => {
+  return num % 2;
+};
+
+const generateDie = (amount = 1) => {
+  for (let i = 0; i < amount; i++) {
+    const dieContainer = document.createElement("div");
+    dieContainer.classList.add("single-die-container");
+    dieContainer.setAttribute("id", `die-${i + 1}`);
+
+    const outerList = document.createElement("ol");
+
+    outerList.classList.add(
+      "single-die",
+      `${isOdd(i) ? "odd-roll" : "even-roll"}`
+    );
+    outerList.dataset.roll = "1";
+    dieContainer.appendChild(outerList);
+
+    for (let j = 0; j < 6; j++) {
+      const side = document.createElement("li");
+      side.classList.add("die-side");
+      side.dataset.side = j + 1;
+      outerList.appendChild(side);
+      for (let k = 0; k <= j; k++) {
+        const dot = document.createElement("span");
+        dot.classList.add("dot");
+        side.appendChild(dot);
+      }
+    }
+
+    elements.diceContainer.appendChild(dieContainer);
+  }
+};
+
+generateDie(6);
+
 const handleRollClick = () => {
   resetDice();
+  const activeDice = [...document.getElementsByTagName("ol")];
 
-  const dice = [...document.querySelectorAll(".active")];
-
-  const result = rollDice(dice);
+  const result = rollDice(activeDice);
 
   prepareForInput(result);
 };
@@ -20,10 +61,9 @@ const resetDice = () => {
   containers.forEach((c) => {
     c.style.borderBottom = "none";
   });
-  const active = [...document.querySelectorAll("ol.active")];
 
-  active.forEach((a, index) => {
-    a.parentElement.setAttribute("id", `die-${index + 1}`);
+  containers.forEach((a, index) => {
+    a.setAttribute("id", `die-${index + 1}`);
   });
 };
 
@@ -55,7 +95,9 @@ const evaluateRoll = (roll) => {
 const highlightScoringDice = (scoringDie) => {
   scoringDie.forEach((die) => {
     const { dieId } = die;
+
     const current = document.getElementById(dieId);
+
     current.style.borderBottom = "2px solid green";
   });
 };
@@ -68,7 +110,6 @@ const activateListeners = (scoringDie) => {
     current.addEventListener("click", () => {
       diceAnimateOut(current);
       moveDice(die);
-      console.log(current);
     });
   });
 };
@@ -79,16 +120,13 @@ const diceAnimateOut = (el) => {
 
 const moveDice = (die) => {
   const { dieId, value } = die;
-
-  const bank = document.querySelector(".bank-dice");
   const el = document.getElementById(dieId);
-  const dice = document.querySelector(".dice");
 
-  dice.removeChild(el);
+  elements.diceContainer.removeChild(el);
 
   const dieForBank = createDieForBank(value);
   addScoreToBank(value);
-  bank.appendChild(dieForBank);
+  elements.bankDice.appendChild(dieForBank);
 };
 
 const createDieForBank = (value) => {
@@ -107,7 +145,6 @@ const createDieForBank = (value) => {
 };
 
 const addScoreToBank = (value) => {
-  let { bankScore } = state;
   let score = 0;
   switch (value) {
     case 1:
@@ -124,9 +161,9 @@ const addScoreToBank = (value) => {
       score = 0;
     }
   }
-  console.log("score", score);
+
   state.bankScore += score;
-  document.querySelector(".bank-score").innerHTML = state.bankScore;
+  elements.bankScore.innerHTML = state.bankScore;
 };
 
 const getNumber = (min, max) => {

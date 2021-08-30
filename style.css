@@ -27,6 +27,8 @@ button {
 .bank-dice {
   display: flex;
   width: 100%;
+  justify-content: center;
+  min-height: 75px;
 }
 
 .bank-dice > .die-side {
@@ -44,7 +46,7 @@ button {
   width: 0.5rem;
 }
 
-.dice {
+.dice-container {
   align-items: center;
   display: grid;
   grid-gap: 2rem;
