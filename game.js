@@ -14,6 +14,7 @@ const isOdd = (num) => {
 };
 
 const generateDie = (amount = 1) => {
+  elements.diceContainer.replaceChildren();
   for (let i = 0; i < amount; i++) {
     const dieContainer = document.createElement("div");
     dieContainer.classList.add("single-die-container");
@@ -80,12 +81,22 @@ const rollDice = (dice) => {
   });
 };
 
+const processLosingTurn = () => {
+  state.bankScore = 0;
+  elements.bankScore.innerHTML = state.bankScore;
+  resetBoard();
+};
+
 const prepareForInput = (result) => {
   const scoringDie = evaluateRoll(result);
 
-  highlightScoringDice(scoringDie);
+  if (scoringDie.length > 0) {
+    highlightScoringDice(scoringDie);
 
-  activateListeners(scoringDie);
+    activateListeners(scoringDie);
+  } else {
+    processLosingTurn();
+  }
 };
 
 const evaluateRoll = (roll) => {
@@ -127,6 +138,8 @@ const moveDice = (die) => {
   const dieForBank = createDieForBank(value);
   addScoreToBank(value);
   elements.bankDice.appendChild(dieForBank);
+
+  elements.diceContainer.childNodes.length === 0 && resetBoard();
 };
 
 const createDieForBank = (value) => {
@@ -164,6 +177,11 @@ const addScoreToBank = (value) => {
 
   state.bankScore += score;
   elements.bankScore.innerHTML = state.bankScore;
+};
+
+const resetBoard = () => {
+  elements.bankDice.replaceChildren();
+  generateDie(6);
 };
 
 const getNumber = (min, max) => {
