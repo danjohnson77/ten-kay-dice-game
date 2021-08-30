@@ -10,19 +10,21 @@
   <body>
     <div class="container">
       <div class="bank">
-        <h2>Bank:</h2>
-        <p class="bank-score">0</p>
+        <h2>Turn Score:</h2>
+        <p class="turn-score">0</p>
         <div class="bank-dice"></div>
       </div>
       <div class="dice-container"></div>
       <div class="button-container">
-        <button class="btn-roll" onclick="handleRollClick()">ROLL DICE</button>
-        <button class="btn-end" disabled>END TURN</button>
+        <button class="btn" onclick="handleRollClick()">ROLL DICE</button>
+        <button class="btn" id="end-turn-btn" disabled>
+          BANK POINTS / END TURN
+        </button>
       </div>
 
       <div class="score-container">
         <h2>Score:</h2>
-        <p class="score"></p>
+        <p id="score"></p>
       </div>
     </div>
   </body>

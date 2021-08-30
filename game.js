@@ -1,13 +1,25 @@
 console.log("GAME IS ON");
+!window.localStorage.getItem("score") &&
+  window.localStorage.setItem("score", 0);
 
 const elements = {
   diceContainer: document.querySelector(".dice-container"),
   bankDice: document.querySelector(".bank-dice"),
-  bankScore: document.querySelector(".bank-score"),
+  turnScore: document.querySelector(".turn-score"),
+  endTurnBtn: document.getElementById("end-turn-btn"),
+  scoreText: document.getElementById("score"),
 };
 const state = {
-  bankScore: 0,
+  turnScore: 0,
+  totalScore: window.localStorage.getItem("score"),
+  scoreText: 0,
 };
+
+const init = () => {
+  document.getElementById("score").textContent = state.totalScore;
+};
+
+init();
 
 const isOdd = (num) => {
   return num % 2;
@@ -56,6 +68,18 @@ const handleRollClick = () => {
   prepareForInput(result);
 };
 
+const handleEndTurnClick = () => {
+  console.log("end turn click");
+  processEndOfTurn();
+};
+
+const processEndOfTurn = () => {
+  updateOverallScore();
+  state.turnScore = 0;
+  elements.turnScore.textContent = state.turnScore;
+  resetBoard();
+};
+
 const resetDice = () => {
   const containers = [...document.querySelectorAll(".single-die-container")];
 
@@ -82,8 +106,9 @@ const rollDice = (dice) => {
 };
 
 const processLosingTurn = () => {
-  state.bankScore = 0;
-  elements.bankScore.innerHTML = state.bankScore;
+  alert("NO SCORE, END OF TURN");
+  state.turnScore = 0;
+  elements.turnScore.textContent = state.turnScore;
   resetBoard();
 };
 
@@ -175,12 +200,28 @@ const addScoreToBank = (value) => {
     }
   }
 
-  state.bankScore += score;
-  elements.bankScore.innerHTML = state.bankScore;
+  state.turnScore += score;
+  elements.turnScore.textContent = state.turnScore;
+
+  elements.endTurnBtn.disabled = false;
+  elements.endTurnBtn.addEventListener("click", handleEndTurnClick);
+};
+
+const updateOverallScore = () => {
+  const currentScore = parseInt(window.localStorage.getItem("score"));
+  console.log("current", currentScore);
+
+  const newScore = currentScore + state.turnScore;
+  console.log("new", newScore);
+  window.localStorage.setItem("score", newScore);
+  state.scoreText = newScore;
+
+  document.getElementById("score").textContent = state.scoreText;
 };
 
 const resetBoard = () => {
   elements.bankDice.replaceChildren();
+  elements.endTurnBtn.disabled = true;
   generateDie(6);
 };
 
