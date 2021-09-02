@@ -103,6 +103,14 @@ const rollDice = (dice) => {
 
     return { dieId: `die-${index + 1}`, value: num };
   });
+  // return [
+  //   { dieId: `die-1`, value: 2 },
+  //   { dieId: `die-2`, value: 2 },
+  //   { dieId: `die-3`, value: 4 },
+  //   { dieId: `die-4`, value: 4 },
+  //   { dieId: `die-5`, value: 4 },
+  //   { dieId: `die-6`, value: 4 },
+  // ];
 };
 
 const processLosingTurn = () => {
@@ -114,8 +122,8 @@ const processLosingTurn = () => {
 
 const prepareForInput = (result) => {
   const scoringDie = evaluateRoll(result);
-
-  if (scoringDie.length > 0) {
+  console.log("scoring", scoringDie);
+  if (scoringDie.sets.length > 0 || scoringDie.singles.length > 0) {
     highlightScoringDice(scoringDie);
 
     activateListeners(scoringDie);
@@ -125,29 +133,60 @@ const prepareForInput = (result) => {
 };
 
 const evaluateRoll = (roll) => {
-  return roll.filter((r, index) => r.value === 1 || r.value === 5);
+  const onesAndFives = roll.filter((r) => r.value === 1 || r.value === 5);
+
+  let matchedArray = [];
+  roll.forEach((r) => {
+    const matched = roll.filter((current) => {
+      return current.value === r.value;
+    });
+    if (matched.length > 2) {
+      matchedArray.push(matched);
+    }
+  });
+
+  matchedArray = matchedArray.filter(
+    (thing, index, self) =>
+      index === self.findIndex((t) => t[0].value === thing[0].value)
+  );
+
+  console.log(matchedArray);
+
+  return { sets: matchedArray, singles: onesAndFives };
 };
 
 const highlightScoringDice = (scoringDie) => {
-  scoringDie.forEach((die) => {
+  const { sets, singles } = scoringDie;
+  singles.forEach((die) => {
     const { dieId } = die;
 
     const current = document.getElementById(dieId);
 
     current.style.borderBottom = "2px solid green";
   });
+  sets.forEach((set) => {
+    set.forEach((s) => {
+      const { dieId } = s;
+
+      const current = document.getElementById(dieId);
+
+      current.style.borderTop = "2px solid blue";
+    });
+  });
 };
 
 const activateListeners = (scoringDie) => {
-  scoringDie.forEach((die) => {
-    const { dieId } = die;
-    const current = document.getElementById(dieId);
+  const { singles, sets } = scoringDie;
+  singles.length > 0 &&
+    singles.forEach((die) => {
+      const { dieId } = die;
+      const current = document.getElementById(dieId);
 
-    current.addEventListener("click", () => {
-      diceAnimateOut(current);
-      moveDice(die);
+      current.addEventListener("click", () => {
+        diceAnimateOut(current);
+        moveDice(die);
+      });
     });
-  });
 };
 
 const diceAnimateOut = (el) => {
@@ -209,10 +248,9 @@ const addScoreToBank = (value) => {
 
 const updateOverallScore = () => {
   const currentScore = parseInt(window.localStorage.getItem("score"));
-  console.log("current", currentScore);
 
   const newScore = currentScore + state.turnScore;
-  console.log("new", newScore);
+
   window.localStorage.setItem("score", newScore);
   state.scoreText = newScore;
 
