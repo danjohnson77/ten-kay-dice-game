@@ -58,6 +58,12 @@ button {
   /* perspective: 1000px; */
 }
 
+.action-btn-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .single-die {
   display: grid;
   list-style-type: none;
