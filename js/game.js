@@ -6,17 +6,50 @@ const elements = {
   diceContainer: document.querySelector(".dice-container"),
   bankDice: document.querySelector(".bank-dice"),
   turnScore: document.querySelector(".turn-score"),
+  rollBtn: document.getElementById("roll-btn"),
   endTurnBtn: document.getElementById("end-turn-btn"),
   scoreText: document.getElementById("score"),
+  scoreboardContainer: document.querySelector(".scoreboard-container"),
+  gameInfoContainer: document.querySelector(".game-info-container"),
 };
 const state = {
   turnScore: 0,
+  currentPlayer: 1,
+  totalPlayers: 4,
   totalScore: window.localStorage.getItem("score"),
   scoreText: 0,
 };
 
+const generateScoreboard = (players = 1) => {
+  const { scoreboardContainer, gameInfoContainer } = elements;
+
+  for (let i = 0; i < players; i++) {
+    const player = document.createElement("div");
+    player.classList.add("player-score-container");
+    player.setAttribute("id", `player-${i + 1}`);
+
+    const playerName = document.createElement("span");
+    playerName.classList.add("player-name");
+    playerName.textContent = `Player ${i + 1}`;
+
+    const score = document.createElement("span");
+    score.textContent = 0;
+
+    score.classList.add("player-score");
+
+    player.appendChild(playerName);
+    player.appendChild(score);
+    scoreboardContainer.appendChild(player);
+  }
+
+  gameInfoContainer.querySelector(".current-player").textContent = document
+    .getElementById(`player-${state.currentPlayer}`)
+    .querySelector(".player-name").textContent;
+};
+
 const init = () => {
   // document.getElementById("score").textContent = state.totalScore;
+  generateScoreboard(4);
 };
 
 init();
@@ -79,6 +112,7 @@ const handleEndTurnClick = () => {
 
 const handleKeepSetButtonClick = (set, value) => {
   console.log("keep set ", set, value);
+
   const valueToAdd =
     value === 0 ? calculateBankedValue(set[0].value, set.length) : value;
 
@@ -158,10 +192,31 @@ const checkForThreePair = (set) => {
   );
 };
 
+const advanceCurrentPlayer = () => {
+  const { gameInfoContainer } = elements;
+
+  if (state.currentPlayer === state.totalPlayers) {
+    state.currentPlayer = 1;
+  } else {
+    state.currentPlayer = state.currentPlayer + 1;
+  }
+
+  gameInfoContainer.querySelector(".current-player").textContent = document
+    .getElementById(`player-${state.currentPlayer}`)
+    .querySelector(".player-name").textContent;
+};
+
 const processEndOfTurn = () => {
+  const { turnScore } = elements;
+
   updateOverallScore();
+
   state.turnScore = 0;
-  elements.turnScore.textContent = state.turnScore;
+
+  turnScore.textContent = state.turnScore;
+
+  advanceCurrentPlayer();
+
   resetBoard();
 };
 
@@ -203,15 +258,16 @@ const processLosingTurn = () => {
   alert("NO SCORE, END OF TURN");
   state.turnScore = 0;
   elements.turnScore.textContent = state.turnScore;
+  advanceCurrentPlayer();
   resetBoard();
 };
 
 const prepareForInput = (result) => {
   const scoringDie = evaluateRoll(result);
-  console.log("scoring", scoringDie);
-  if (scoringDie.sets.length > 0 || scoringDie.singles.length > 0) {
-    addActionButtons(scoringDie);
 
+  if (scoringDie.sets.length > 0 || scoringDie.singles.length > 0) {
+    elements.rollBtn.disabled = true;
+    addActionButtons(scoringDie);
     activateListeners(scoringDie);
   } else {
     processLosingTurn();
@@ -305,7 +361,7 @@ const diceAnimateOut = (el) => {
 const moveDice = (die) => {
   console.log("moveDice", die);
   const { dieId, value } = die;
-  const { bankDice, diceContainer } = elements;
+  const { bankDice, diceContainer, rollBtn } = elements;
   const el = document.getElementById(dieId);
 
   diceContainer.removeChild(el);
@@ -313,7 +369,7 @@ const moveDice = (die) => {
   const dieForBank = createDieForBank(value);
 
   bankDice.appendChild(dieForBank);
-
+  rollBtn.disabled = false;
   diceContainer.childNodes.length === 0 && resetBoard();
 };
 
@@ -342,14 +398,13 @@ const addScoreToBank = (value) => {
 };
 
 const updateOverallScore = () => {
-  const currentScore = parseInt(window.localStorage.getItem("score"));
+  const currentPlayer = `player-${state.currentPlayer}`;
+  const scoreDisplay = document
+    .getElementById(currentPlayer)
+    .querySelector(".player-score");
 
-  const newScore = currentScore + state.turnScore;
-
-  window.localStorage.setItem("score", newScore);
-  state.scoreText = newScore;
-
-  document.getElementById("score").textContent = state.scoreText;
+  scoreDisplay.textContent =
+    parseInt(scoreDisplay.textContent) + state.turnScore;
 };
 
 const clearActionButtons = () => {
@@ -359,7 +414,8 @@ const clearActionButtons = () => {
 };
 
 const resetBoard = () => {
-  const { bankDice, endTurnBtn } = elements;
+  const { bankDice, endTurnBtn, gameInfoContainer } = elements;
+
   bankDice.replaceChildren();
   endTurnBtn.disabled = true;
   clearActionButtons();

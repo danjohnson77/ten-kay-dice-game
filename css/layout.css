@@ -37,6 +37,7 @@
 
 .dice-container {
   grid-column: 1 / 3;
+  min-height: 400px;
 }
 
 .roll-button-container {
@@ -50,4 +51,6 @@
 .scoreboard-container {
   grid-row: 4;
   grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
 }

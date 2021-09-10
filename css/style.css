@@ -10,12 +10,6 @@ html {
   background: var(--bg-color);
 }
 
-.button-container {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
-}
-
 .action-btn-container {
   display: flex;
   flex-direction: column;
@@ -34,6 +28,12 @@ html {
   font-size: 2rem;
 }
 
+.bank-dice-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .bank-dice {
   display: flex;
   width: 100%;
@@ -41,8 +41,8 @@ html {
 }
 
 .bank-dice > .die-side {
-  height: 40px;
-  width: 40px;
+  height: 3rem;
+  width: 3rem;
   margin: 1rem;
   padding: 0.5rem;
   grid-column: auto;
@@ -53,4 +53,15 @@ html {
 .bank-dice > .die-side > .dot {
   height: 0.5rem;
   width: 0.5rem;
+}
+
+.player-score-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-score {
+  font-size: 2rem;
+  padding: 0 3rem;
 }
