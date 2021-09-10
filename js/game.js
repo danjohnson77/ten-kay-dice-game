@@ -16,7 +16,7 @@ const state = {
 };
 
 const init = () => {
-  document.getElementById("score").textContent = state.totalScore;
+  // document.getElementById("score").textContent = state.totalScore;
 };
 
 init();
@@ -224,6 +224,7 @@ const evaluateRoll = (roll) => {
   if (sixDiceCheck) {
     return { sets: [sixDiceCheck.set], value: sixDiceCheck.value, singles: [] };
   }
+
   const onesAndFives = roll.filter((r) => r.value === 1 || r.value === 5);
 
   roll.forEach((r) => {

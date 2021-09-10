@@ -4,29 +4,53 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./css/style.css" />
     <title>Document</title>
   </head>
   <body>
-    <div class="container">
-      <div class="bank">
-        <h2>Turn Score:</h2>
-        <p class="turn-score">0</p>
-        <div class="bank-dice"></div>
+    <div class="layout-container">
+      <div class="game-info-container flex-column">
+        <h1 class="current-player">Player 1</h1>
+        <div class="turn-score-container">
+          <h2>Turn Score:</h2>
+          <p class="turn-score"></p>
+        </div>
+        <div class="bank-dice-container">
+          <h2>Banked Dice:</h2>
+          <div class="bank-dice"></div>
+        </div>
+      </div>
+      <div class="end-turn-container flex-column">
+        <div class="nav-container">
+          <button>NEW GAME</button>
+          <button>RULES</button>
+        </div>
+        <button id="end-turn-btn" disabled>BANK & END TURN</button>
       </div>
       <div class="dice-container"></div>
-      <div class="button-container">
-        <button class="btn" onclick="handleRollClick()">ROLL DICE</button>
-        <button class="btn" id="end-turn-btn" disabled>
-          BANK POINTS / END TURN
-        </button>
+      <div class="roll-button-container">
+        <button onclick="handleRollClick()">ROLL DICE</button>
       </div>
-
-      <div class="score-container">
-        <h2>Score:</h2>
-        <p id="score"></p>
-      </div>
+      <div class="scoreboard-container"></div>
     </div>
   </body>
-  <script src="game.js"></script>
+  <script src="./js/game.js"></script>
 </html>
+
+<!-- <div class="bank">
+  <h2>Turn Score:</h2>
+  <p class="turn-score">0</p>
+  <div class="bank-dice"></div>
+</div>
+<div class="dice-container"></div>
+<div class="button-container">
+  <button class="btn" onclick="handleRollClick()">ROLL DICE</button>
+  <button class="btn" id="end-turn-btn" disabled>
+    BANK POINTS / END TURN
+  </button>
+</div>
+
+<div class="score-container">
+  <h2>Score:</h2>
+  <p id="score"></p>
+</div> -->

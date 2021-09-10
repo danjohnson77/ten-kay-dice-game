@@ -1,0 +1,28 @@
+button {
+  background-color: transparent;
+  color: var(--bg-color);
+  border: 1px solid var(--font-color);
+  border-radius: 4px;
+  padding: 5px 20px;
+  width: fit-content;
+  transition: all 200ms;
+  cursor: pointer;
+}
+
+button:hover {
+  color: black;
+  transform: scale(1.1);
+  background-color: var(--font-color);
+}
+
+button:disabled {
+  color: var(--font-disabled);
+  border: 1px solid var(--font-disabled);
+  pointer-events: none;
+  opacity: 30%;
+}
+
+.nav-container > button {
+  font-size: 0.75rem;
+  width: fit-content;
+}
