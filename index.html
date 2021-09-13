@@ -33,6 +33,29 @@
       </div>
       <div class="scoreboard-container"></div>
     </div>
+    <div class="modal-container">
+      <div class="modal-box">
+        <div class="form-container">
+          <form action="">
+            <label for="numberOfPlayers">
+              How many players? (1 - 4)
+              <input type="number" id="numberOfPlayers" min="1" max="4"
+            /></label>
+            <label for="scoreLimit">
+              What score should we play to? (50 - 10000)
+              <input
+                type="number"
+                id="scoreLimit"
+                min="50"
+                max="10000"
+                step="50"
+              />
+            </label>
+          </form>
+          <button onclick="startNewGame()">Start Game</button>
+        </div>
+      </div>
+    </div>
   </body>
   <script src="./js/game.js"></script>
 </html>

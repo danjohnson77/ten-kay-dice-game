@@ -11,13 +11,18 @@ const elements = {
   scoreText: document.getElementById("score"),
   scoreboardContainer: document.querySelector(".scoreboard-container"),
   gameInfoContainer: document.querySelector(".game-info-container"),
+  layoutContainer: document.querySelector(".layout-container"),
+  modalContainer: document.querySelector(".modal-container"),
+  playerNumberInput: document.getElementById("numberOfPlayers"),
+  scoreLimitInput: document.getElementById("scoreLimit"),
 };
 const state = {
   turnScore: 0,
   currentPlayer: 1,
-  totalPlayers: 4,
-  totalScore: window.localStorage.getItem("score"),
-  scoreText: 0,
+
+  scoreLimit: 10000,
+  winningScoreReached: false,
+  winningPlayer: 1,
 };
 
 const generateScoreboard = (players = 1) => {
@@ -49,10 +54,46 @@ const generateScoreboard = (players = 1) => {
 
 const init = () => {
   // document.getElementById("score").textContent = state.totalScore;
-  generateScoreboard(4);
+  generateScoreboard(localStorage.getItem("players"));
 };
 
-init();
+const activateModal = () => {
+  const { layoutContainer } = elements;
+
+  layoutContainer.style.display = "none";
+};
+
+const startNewGame = () => {
+  const {
+    playerNumberInput,
+    scoreLimitInput,
+    layoutContainer,
+    modalContainer,
+  } = elements;
+
+  if (
+    validateInput(playerNumberInput.value, 1, 4) &&
+    validateInput(scoreLimitInput.value, 50, 10000)
+  ) {
+    localStorage.setItem("players", playerNumberInput.value);
+    localStorage.setItem("limit", scoreLimitInput.value);
+
+    modalContainer.style.display = "none";
+    layoutContainer.style.display = "grid";
+    init();
+  } else {
+    console.log("BAD INPUT");
+  }
+};
+
+const validateInput = (input, min, max) => {
+  if (input < min || input > max) {
+    alert(`Please enter a value between ${min} and ${max}`);
+    return false;
+  } else {
+    return true;
+  }
+};
 
 const isOdd = (num) => {
   return num % 2;
@@ -106,13 +147,10 @@ const handleRollClick = () => {
 };
 
 const handleEndTurnClick = () => {
-  console.log("end turn click");
   processEndOfTurn();
 };
 
 const handleKeepSetButtonClick = (set, value) => {
-  console.log("keep set ", set, value);
-
   const valueToAdd =
     value === 0 ? calculateBankedValue(set[0].value, set.length) : value;
 
@@ -140,7 +178,6 @@ const handleKeepSingleButtonClick = (die) => {
 };
 
 const calculateBankedValue = (value, length = 1) => {
-  console.log("banked", value);
   let finalVal = 0;
   if (value === 1) {
     finalVal = value * 1000;
@@ -148,13 +185,13 @@ const calculateBankedValue = (value, length = 1) => {
     finalVal = value * 100;
   }
   finalVal = length > 1 ? checkForMultiplier(finalVal, length) : finalVal;
-  console.log("final", finalVal);
+
   return finalVal;
 };
 
 const checkForMultiplier = (val, length) => {
   const offset = length - 2;
-  console.log("offset", offset);
+
   return offset > 0 ? val * offset : val;
 };
 
@@ -169,13 +206,11 @@ const checkForSixDiceScore = (set) => {
 };
 
 const checkForStraight = (set) => {
-  console.log("set", set);
   const input = set.map((s) => s.value);
   const sorted = input.sort((a, b) => {
     return a - b;
   });
   const criteria = [1, 2, 3, 4, 5, 6];
-  console.log("sorted", sorted);
 
   return JSON.stringify(sorted) === JSON.stringify(criteria);
 };
@@ -195,7 +230,7 @@ const checkForThreePair = (set) => {
 const advanceCurrentPlayer = () => {
   const { gameInfoContainer } = elements;
 
-  if (state.currentPlayer === state.totalPlayers) {
+  if (state.currentPlayer === parseInt(localStorage.getItem("players"))) {
     state.currentPlayer = 1;
   } else {
     state.currentPlayer = state.currentPlayer + 1;
@@ -254,6 +289,13 @@ const rollDice = (dice) => {
   // ];
 };
 
+const getNumber = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 const processLosingTurn = () => {
   alert("NO SCORE, END OF TURN");
   state.turnScore = 0;
@@ -309,7 +351,7 @@ const addActionButtons = (scoringDie) => {
     const buttonContainer = current.querySelector(".action-btn-container");
     const button = document.createElement("button");
     button.classList.add("btn", "single-button");
-    button.textContent = "KEEP SINGLE DIE";
+    button.textContent = "KEEP ONE";
     buttonContainer.appendChild(button);
   });
   sets.forEach((set) => {
@@ -359,7 +401,6 @@ const diceAnimateOut = (el) => {
 };
 
 const moveDice = (die) => {
-  console.log("moveDice", die);
   const { dieId, value } = die;
   const { bankDice, diceContainer, rollBtn } = elements;
   const el = document.getElementById(dieId);
@@ -422,9 +463,6 @@ const resetBoard = () => {
   generateDie(6);
 };
 
-const getNumber = (min, max) => {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+const checkForWin = (score) => {
+  const { scoreLimit } = state;
 };
