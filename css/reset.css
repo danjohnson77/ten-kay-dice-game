@@ -1,9 +1,4 @@
-/* Box sizing rules */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+
 
 /* Remove default padding */
 ul[class],

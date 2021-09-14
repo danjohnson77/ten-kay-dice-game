@@ -8,4 +8,6 @@
   --font-color: #f0f0f0;
   --font-disabled: #9f9f9f;
   --main-font: "Roboto", sans-serif;
+  --dice-size: 4rem;
+  --dice-translateZ: 2.25rem;
 }

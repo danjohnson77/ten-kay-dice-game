@@ -63,6 +63,7 @@ const generateScoreboard = (players = 1) => {
 
 const init = () => {
   generateScoreboard(localStorage.getItem("players"));
+  generateDie(6);
 };
 
 const activateModal = () => {
@@ -92,10 +93,8 @@ const startNewGame = () => {
     modalContainer.style.display = "none";
     layoutContainer.style.display = "grid";
     state = { ...initState, lastTurnTaken: [] };
-    console.log("state", state);
+
     init();
-  } else {
-    console.log("BAD INPUT");
   }
 };
 
@@ -148,15 +147,121 @@ const generateDie = (amount = 1) => {
   }
 };
 
-generateDie(6);
-
 const handleRollClick = () => {
   resetDice();
   const activeDice = [...document.getElementsByTagName("ol")];
 
   const result = rollDice(activeDice);
 
-  prepareForInput(result);
+  animateDice(result);
+
+  //  prepareForInput(result);
+};
+
+const animateDice = (result) => {
+  result.forEach((r, index, self) => {
+    const { dieId, value } = r;
+
+    const die = document.getElementById(dieId).querySelector(".single-die");
+
+    die.classList.toggle("even-roll");
+    die.classList.toggle("odd-roll");
+
+    const oddEven = die.classList.contains("odd-roll") ? "odd" : "even";
+
+    const { x, y, z } = getRotation(value, oddEven);
+
+    gsap.to(die, {
+      duration: 1,
+      rotateX: `${x}deg`,
+      rotateY: `${y}deg`,
+      rotateZ: `${z}deg`,
+      ease: "power4.out",
+      onComplete: () => {
+        index === self.length - 1 && prepareForInput(self);
+      },
+    });
+  });
+};
+
+const getRotation = (value, oddEven) => {
+  const rotations = {
+    odd: [
+      { x: -360, y: -720, z: -360 },
+      { x: -270, y: -720, z: -360 },
+      { x: -360, y: -810, z: -360 },
+      { x: -360, y: -630, z: -360 },
+      { x: -450, y: -720, z: -360 },
+      { x: -360, y: -900, z: -360 },
+    ],
+    even: [
+      { x: 360, y: 720, z: 360 },
+      { x: 450, y: 720, z: 360 },
+      { x: 360, y: 630, z: 360 },
+      { x: 360, y: 810, z: 360 },
+      { x: 270, y: 720, z: 360 },
+      { x: 360, y: 900, z: 360 },
+    ],
+  };
+
+  return rotations[oddEven][value - 1];
+};
+
+const rollDice = (dice) => {
+  return dice.map((die, index) => {
+    const num = getNumber(1, 6);
+
+    die.dataset.roll = num;
+
+    return { dieId: `die-${index + 1}`, value: num };
+  });
+  // return [
+  //   { dieId: `die-1`, value: 1 },
+  //   { dieId: `die-2`, value: 1 },
+  //   { dieId: `die-3`, value: 3 },
+  //   { dieId: `die-4`, value: 4 },
+  //   { dieId: `die-5`, value: 5 },
+  //   { dieId: `die-6`, value: 1 },
+  // ];
+};
+
+const prepareForInput = (result) => {
+  const { rollBtn } = elements;
+  const scoringDie = evaluateRoll(result);
+
+  if (scoringDie.sets.length > 0 || scoringDie.singles.length > 0) {
+    rollBtn.disabled = true;
+    addActionButtons(scoringDie);
+    activateListeners(scoringDie);
+  } else {
+    processLosingTurn();
+  }
+};
+
+const evaluateRoll = (roll) => {
+  let matchedArray = [];
+  const sixDiceCheck = roll.length === 6 ? checkForSixDiceScore(roll) : null;
+  if (sixDiceCheck) {
+    return { sets: [sixDiceCheck.set], value: sixDiceCheck.value, singles: [] };
+  }
+
+  const onesAndFives = roll.filter((r) => r.value === 1 || r.value === 5);
+
+  roll.forEach((r) => {
+    const matched = roll.filter((current) => {
+      return current.value === r.value;
+    });
+    if (matched.length > 2) {
+      matchedArray.push(matched);
+    }
+  });
+
+  matchedArray = matchedArray.filter(
+    (thing, index, self) =>
+      index === self.findIndex((t) => t[0].value === thing[0].value)
+  );
+
+  return { sets: matchedArray, singles: onesAndFives };
 };
 
 const handleEndTurnClick = () => {
@@ -281,27 +386,6 @@ const resetDice = () => {
   });
 };
 
-const rollDice = (dice) => {
-  return dice.map((die, index) => {
-    die.classList.toggle("even-roll");
-    die.classList.toggle("odd-roll");
-
-    const num = getNumber(1, 6);
-
-    die.dataset.roll = num;
-
-    return { dieId: `die-${index + 1}`, value: num };
-  });
-  // return [
-  //   { dieId: `die-1`, value: 6 },
-  //   { dieId: `die-2`, value: 2 },
-  //   { dieId: `die-3`, value: 3 },
-  //   { dieId: `die-4`, value: 4 },
-  //   { dieId: `die-5`, value: 5 },
-  //   { dieId: `die-6`, value: 1 },
-  // ];
-};
-
 const getNumber = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -317,44 +401,6 @@ const processLosingTurn = () => {
   resetBoard();
 };
 
-const prepareForInput = (result) => {
-  const scoringDie = evaluateRoll(result);
-
-  if (scoringDie.sets.length > 0 || scoringDie.singles.length > 0) {
-    elements.rollBtn.disabled = true;
-    addActionButtons(scoringDie);
-    activateListeners(scoringDie);
-  } else {
-    processLosingTurn();
-  }
-};
-
-const evaluateRoll = (roll) => {
-  let matchedArray = [];
-  const sixDiceCheck = roll.length === 6 ? checkForSixDiceScore(roll) : null;
-  if (sixDiceCheck) {
-    return { sets: [sixDiceCheck.set], value: sixDiceCheck.value, singles: [] };
-  }
-
-  const onesAndFives = roll.filter((r) => r.value === 1 || r.value === 5);
-
-  roll.forEach((r) => {
-    const matched = roll.filter((current) => {
-      return current.value === r.value;
-    });
-    if (matched.length > 2) {
-      matchedArray.push(matched);
-    }
-  });
-
-  matchedArray = matchedArray.filter(
-    (thing, index, self) =>
-      index === self.findIndex((t) => t[0].value === thing[0].value)
-  );
-
-  return { sets: matchedArray, singles: onesAndFives };
-};
-
 const addActionButtons = (scoringDie) => {
   const { sets, singles } = scoringDie;
   singles.forEach((die) => {
@@ -366,6 +412,7 @@ const addActionButtons = (scoringDie) => {
     button.classList.add("btn", "single-button");
     button.textContent = "KEEP ONE";
     buttonContainer.appendChild(button);
+    buttonContainer.style.opacity = "1";
   });
   sets.forEach((set) => {
     set.forEach((s) => {
@@ -377,6 +424,7 @@ const addActionButtons = (scoringDie) => {
       button.classList.add("btn", "set-button");
       button.textContent = "KEEP SET";
       buttonContainer.appendChild(button);
+      buttonContainer.style.opacity = "1";
     });
   });
 };
@@ -475,7 +523,7 @@ const processLastChance = (score, player) => {
     updateWinner(score, player);
   }
   state.lastTurnTaken.push(state.currentPlayer);
-  console.log("last chance", state.lastTurnTaken);
+
   if (
     state.lastTurnTaken.length === parseInt(localStorage.getItem("players"))
   ) {
@@ -506,7 +554,7 @@ const checkForWin = (score) => {
 
 const processWin = (score) => {
   state.lastTurnTaken.push(state.currentPlayer);
-  console.log("winner", state.lastTurnTaken);
+
   state.winningScoreReached = true;
   updateWinner(score);
 };

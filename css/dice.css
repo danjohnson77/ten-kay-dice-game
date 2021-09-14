@@ -1,36 +1,57 @@
+
+
 .dice-container {
   align-items: center;
   display: grid;
-  grid-gap: 2rem;
+  gap: 2rem;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: auto;
   justify-items: center;
   padding: 2rem;
   flex-grow: 1;
-  /* perspective: 1000px; */
+  min-height: 225px; 
+  perspective: 2000px;
 }
 
-.single-die {
+.single-die-container {
+  display: flex;
+  flex-direction: column;
+ 
+  align-items: center;
+  /* transition: transform 1s ease-out; */
+}
+
+.action-btn-container {
+  display: flex;
+  opacity: 0;
+  transition: opacity .5s ease-in;
+  min-height: 40px;
+  margin-top: 4rem;
+}
+
+.action-btn-container > button {
+  margin: 0 .5rem
+}
+
+ol.single-die {
   display: grid;
-  list-style-type: none;
   transform-style: preserve-3d;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
   justify-items: center;
-  padding: 2rem;
-  gap: 2rem;
+  
+  height: var(--dice-size);
+  width: var(--dice-size);
 }
 
-.single-die-container {
-  transition: transform 1s ease-out;
-}
 
-.even-roll {
+
+/* .even-roll {
   transition: transform 1.5s ease-out;
 }
 .odd-roll {
   transition: transform 1.25s ease-out;
-}
+} */
 
 .die-side {
   background-color: #fefefe;
@@ -46,8 +67,9 @@
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   height: 100%;
+ padding: .2rem;
   width: 100%;
-  padding: 1rem;
+ 
 }
 
 .dot {
@@ -98,22 +120,22 @@
   transform: rotateX(-360deg) rotateY(-900deg) rotateZ(-360deg);
 }
 [data-side="1"] {
-  transform: rotate3d(0, 0, 0, 90deg) translateZ(4rem);
+  transform: rotate3d(0, 0, 0, 90deg) translateZ(var(--dice-translateZ));
 }
 [data-side="2"] {
-  transform: rotate3d(-1, 0, 0, 90deg) translateZ(4rem);
+  transform: rotate3d(-1, 0, 0, 90deg) translateZ(var(--dice-translateZ));
 }
 [data-side="3"] {
-  transform: rotate3d(0, 1, 0, 90deg) translateZ(4rem);
+  transform: rotate3d(0, 1, 0, 90deg) translateZ(var(--dice-translateZ));
 }
 [data-side="4"] {
-  transform: rotate3d(0, -1, 0, 90deg) translateZ(4rem);
+  transform: rotate3d(0, -1, 0, 90deg) translateZ(var(--dice-translateZ));
 }
 [data-side="5"] {
-  transform: rotate3d(1, 0, 0, 90deg) translateZ(4rem);
+  transform: rotate3d(1, 0, 0, 90deg) translateZ(var(--dice-translateZ));
 }
 [data-side="6"] {
-  transform: rotate3d(1, 0, 0, 180deg) translateZ(4rem);
+  transform: rotate3d(1, 0, 0, 180deg) translateZ(var(--dice-translateZ));
 }
 [data-side="1"] .dot:nth-of-type(1) {
   grid-area: five;
