@@ -1,7 +1,3 @@
-console.log("GAME IS ON");
-!window.localStorage.getItem("score") &&
-  window.localStorage.setItem("score", 0);
-
 const elements = {
   diceContainer: document.querySelector(".dice-container"),
   bankDice: document.querySelector(".bank-dice"),
@@ -16,7 +12,17 @@ const elements = {
   playerNumberInput: document.getElementById("numberOfPlayers"),
   scoreLimitInput: document.getElementById("scoreLimit"),
 };
-const state = {
+let state = {
+  turnScore: 0,
+  currentPlayer: 1,
+
+  winningScoreReached: false,
+  winningScore: 0,
+  winningPlayer: 1,
+  lastTurnTaken: [],
+};
+
+const initState = {
   turnScore: 0,
   currentPlayer: 1,
 
@@ -28,6 +34,8 @@ const state = {
 
 const generateScoreboard = (players = 1) => {
   const { scoreboardContainer, gameInfoContainer } = elements;
+
+  scoreboardContainer.replaceChildren();
 
   for (let i = 0; i < players; i++) {
     const player = document.createElement("div");
@@ -54,17 +62,19 @@ const generateScoreboard = (players = 1) => {
 };
 
 const init = () => {
-  // document.getElementById("score").textContent = state.totalScore;
   generateScoreboard(localStorage.getItem("players"));
 };
 
 const activateModal = () => {
-  const { layoutContainer } = elements;
+  const { layoutContainer, modalContainer } = elements;
 
   layoutContainer.style.display = "none";
+  modalContainer.style.display = "flex";
 };
 
 const startNewGame = () => {
+  localStorage.clear();
+
   const {
     playerNumberInput,
     scoreLimitInput,
@@ -81,6 +91,8 @@ const startNewGame = () => {
 
     modalContainer.style.display = "none";
     layoutContainer.style.display = "grid";
+    state = { ...initState, lastTurnTaken: [] };
+    console.log("state", state);
     init();
   } else {
     console.log("BAD INPUT");
@@ -449,13 +461,12 @@ const updateOverallScore = () => {
 
   scoreDisplay.textContent = newScore;
 
-  if (checkForWin(newScore) && state.winningScoreReached === false) {
-    console.log("WIN TRIGGERED");
-    processWin(newScore);
-  }
-
   if (state.winningScoreReached) {
     processLastChance(newScore, currentPlayer);
+  }
+
+  if (checkForWin(newScore) && state.winningScoreReached === false) {
+    processWin(newScore);
   }
 };
 
@@ -463,9 +474,8 @@ const processLastChance = (score, player) => {
   if (score > state.winningScore) {
     updateWinner(score, player);
   }
-
   state.lastTurnTaken.push(state.currentPlayer);
-
+  console.log("last chance", state.lastTurnTaken);
   if (
     state.lastTurnTaken.length === parseInt(localStorage.getItem("players"))
   ) {
@@ -490,13 +500,14 @@ const resetBoard = () => {
 
 const checkForWin = (score) => {
   const limit = parseInt(localStorage.getItem("limit"));
-  console.log("LIMIT", limit);
+
   return score >= limit;
 };
 
 const processWin = (score) => {
+  state.lastTurnTaken.push(state.currentPlayer);
+  console.log("winner", state.lastTurnTaken);
   state.winningScoreReached = true;
-
   updateWinner(score);
 };
 
@@ -519,7 +530,7 @@ const updateWinner = (score) => {
 };
 
 const declareFinalWinner = () => {
-  const player = document.getElementById(`player-${state.currentPlayer}`);
+  const player = document.getElementById(`player-${state.winningPlayer}`);
 
   const name = player.querySelector(".player-name").textContent;
 
