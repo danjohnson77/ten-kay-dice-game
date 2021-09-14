@@ -20,9 +20,10 @@ const state = {
   turnScore: 0,
   currentPlayer: 1,
 
-  scoreLimit: 10000,
   winningScoreReached: false,
+  winningScore: 0,
   winningPlayer: 1,
+  lastTurnTaken: [],
 };
 
 const generateScoreboard = (players = 1) => {
@@ -439,13 +440,37 @@ const addScoreToBank = (value) => {
 };
 
 const updateOverallScore = () => {
-  const currentPlayer = `player-${state.currentPlayer}`;
-  const scoreDisplay = document
-    .getElementById(currentPlayer)
-    .querySelector(".player-score");
+  const currentPlayer = document.getElementById(
+    `player-${state.currentPlayer}`
+  );
+  const scoreDisplay = currentPlayer.querySelector(".player-score");
 
-  scoreDisplay.textContent =
-    parseInt(scoreDisplay.textContent) + state.turnScore;
+  const newScore = parseInt(scoreDisplay.textContent) + state.turnScore;
+
+  scoreDisplay.textContent = newScore;
+
+  if (checkForWin(newScore) && state.winningScoreReached === false) {
+    console.log("WIN TRIGGERED");
+    processWin(newScore);
+  }
+
+  if (state.winningScoreReached) {
+    processLastChance(newScore, currentPlayer);
+  }
+};
+
+const processLastChance = (score, player) => {
+  if (score > state.winningScore) {
+    updateWinner(score, player);
+  }
+
+  state.lastTurnTaken.push(state.currentPlayer);
+
+  if (
+    state.lastTurnTaken.length === parseInt(localStorage.getItem("players"))
+  ) {
+    declareFinalWinner();
+  }
 };
 
 const clearActionButtons = () => {
@@ -464,5 +489,39 @@ const resetBoard = () => {
 };
 
 const checkForWin = (score) => {
-  const { scoreLimit } = state;
+  const limit = parseInt(localStorage.getItem("limit"));
+  console.log("LIMIT", limit);
+  return score >= limit;
+};
+
+const processWin = (score) => {
+  state.winningScoreReached = true;
+
+  updateWinner(score);
+};
+
+const updateWinner = (score) => {
+  const playerId = `player-${state.currentPlayer}`;
+  const playerDisplay = document.getElementById(playerId);
+
+  state.winningPlayer = state.currentPlayer;
+  state.winningScore = score;
+
+  const otherPlayers = document.querySelectorAll(
+    `.player-score-container:not(#${playerId})`
+  );
+
+  otherPlayers.forEach((player) => {
+    player.style.color = "white";
+  });
+
+  playerDisplay.style.color = "green";
+};
+
+const declareFinalWinner = () => {
+  const player = document.getElementById(`player-${state.currentPlayer}`);
+
+  const name = player.querySelector(".player-name").textContent;
+
+  alert(`${name} has won the game!`);
 };
