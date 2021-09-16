@@ -11,27 +11,26 @@
     <div class="layout-container">
       <div class="game-info-container flex-column">
         <h1 class="current-player"></h1>
-        <div class="turn-score-container">
-          <h2>Turn Score:</h2>
-          <p class="turn-score"></p>
-        </div>
         <div class="bank-dice-container">
-          <h2>Banked Dice:</h2>
+          <h2>Banked Dice<span class="turn-score"></span></h2>
+
           <div class="bank-dice"></div>
         </div>
       </div>
-      <div class="end-turn-container flex-column">
-        <div class="nav-container">
-          <button onclick="activateModal()">NEW GAME</button>
-          <button>RULES</button>
-        </div>
+
+      <div class="end-turn-container">
         <button id="end-turn-btn" disabled>BANK & END TURN</button>
       </div>
+      <div class="scoreboard-container"></div>
+
       <div class="dice-container"></div>
       <div class="roll-button-container">
         <button onclick="handleRollClick()" id="roll-btn">ROLL DICE</button>
       </div>
-      <div class="scoreboard-container"></div>
+      <div class="nav-container">
+        <button onclick="activateModal()">NEW GAME</button>
+        <button>RULES</button>
+      </div>
     </div>
     <div class="modal-container">
       <div class="modal-box">
@@ -60,21 +59,3 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
   <script src="./js/game.js"></script>
 </html>
-
-<!-- <div class="bank">
-  <h2>Turn Score:</h2>
-  <p class="turn-score">0</p>
-  <div class="bank-dice"></div>
-</div>
-<div class="dice-container"></div>
-<div class="button-container">
-  <button class="btn" onclick="handleRollClick()">ROLL DICE</button>
-  <button class="btn" id="end-turn-btn" disabled>
-    BANK POINTS / END TURN
-  </button>
-</div>
-
-<div class="score-container">
-  <h2>Score:</h2>
-  <p id="score"></p>
-</div> -->

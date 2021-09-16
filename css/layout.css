@@ -1,14 +1,13 @@
 .flex-column {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .layout-container {
   display: none;
-  grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: minmax(100px, auto);
-  min-height: 100vh;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto 1fr;
+  min-height: 80vh;
   max-width: 1280px;
   padding: 60px;
   margin: 0 auto;
@@ -17,40 +16,37 @@
 .nav-container {
   display: flex;
   justify-content: space-between;
+  grid-row: 4;
+  grid-column: 3;
 }
 
 .game-info-container {
   grid-column: 1;
-  padding-right: 30%;
-}
-
-.turn-score-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .end-turn-container {
-  grid-column: 2;
-  padding-left: 30%;
+  grid-row: 2;
+  grid-column: 3;
+  padding: 2rem 0;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .dice-container {
-  grid-column: 1 / 3;
-  min-height: 400px;
+  grid-column: 1 / 4;
+  transition: 1s;
 }
 
 .roll-button-container {
-  grid-row: 3;
-  grid-column: 1 / 3;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  grid-row: 2;
+  grid-column: 1;
+  padding: 2rem 0;
 }
 
 .scoreboard-container {
-  grid-row: 4;
-  grid-column: 1 / 3;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-row: 1;
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
