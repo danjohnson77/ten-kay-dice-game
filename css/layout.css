@@ -6,7 +6,7 @@
 .layout-container {
   display: none;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto 0.5fr auto;
   min-height: 80vh;
   max-width: 1280px;
   padding: 60px;
@@ -16,7 +16,8 @@
 .nav-container {
   display: flex;
   justify-content: space-between;
-  grid-row: 4;
+  align-items: flex-end;
+  grid-row: 5;
   grid-column: 3;
 }
 
@@ -25,22 +26,27 @@
 }
 
 .end-turn-container {
-  grid-row: 2;
-  grid-column: 3;
-  padding: 2rem 0;
+  grid-row: 1;
+  grid-column: 2;
+
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
 }
 
 .dice-container {
   grid-column: 1 / 4;
+  grid-row: 3;
   transition: 1s;
 }
 
 .roll-button-container {
-  grid-row: 2;
-  grid-column: 1;
-  padding: 2rem 0;
+  grid-row: 4;
+  grid-column: 2;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .scoreboard-container {
@@ -48,5 +54,12 @@
   grid-column: 3;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  align-items: flex-end;
+}
+.action-btn-container {
+  grid-row: 2;
+  grid-column: 1 / 4;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }

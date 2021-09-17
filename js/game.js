@@ -4,6 +4,8 @@ const elements = {
   turnScore: document.querySelector(".turn-score"),
   rollBtn: document.getElementById("roll-btn"),
   endTurnBtn: document.getElementById("end-turn-btn"),
+  keepSelectedBtn: document.getElementById("keep-selected-btn"),
+  keepAllBtn: document.getElementById("keep-all-btn"),
   scoreText: document.getElementById("score"),
   scoreboardContainer: document.querySelector(".scoreboard-container"),
   gameInfoContainer: document.querySelector(".game-info-container"),
@@ -21,18 +23,10 @@ let state = {
   winningPlayer: 1,
   lastTurnTaken: [],
   selectedTotal: 0,
+  maxTotal: 0,
 };
 
-const initState = {
-  turnScore: 0,
-  currentPlayer: 1,
-
-  winningScoreReached: false,
-  winningScore: 0,
-  winningPlayer: 1,
-  lastTurnTaken: [],
-  selectedTotal: 0,
-};
+const initState = state;
 
 const generateScoreboard = (players = 1) => {
   const { scoreboardContainer, gameInfoContainer } = elements;
@@ -58,6 +52,10 @@ const generateScoreboard = (players = 1) => {
     scoreboardContainer.appendChild(player);
   }
 
+  const scoreLimit = document.createElement("p");
+  scoreLimit.textContent = `Playing to ${localStorage.getItem("limit")}`;
+  scoreboardContainer.appendChild(scoreLimit);
+
   gameInfoContainer.querySelector(".current-player").textContent = document
     .getElementById(`player-${state.currentPlayer}`)
     .querySelector(".player-name").textContent;
@@ -65,7 +63,7 @@ const generateScoreboard = (players = 1) => {
 
 const init = () => {
   generateScoreboard(localStorage.getItem("players"));
-  generateDie(6);
+  resetBoard();
 };
 
 const activateModal = () => {
@@ -84,6 +82,7 @@ const startNewGame = () => {
     scoreLimitInput,
     layoutContainer,
     modalContainer,
+    rollBtn,
   } = elements;
 
   if (
@@ -95,6 +94,7 @@ const startNewGame = () => {
 
     modalContainer.style.display = "none";
     layoutContainer.style.display = "grid";
+    rollBtn.disabled = false;
     state = { ...initState, lastTurnTaken: [] };
 
     init();
@@ -151,6 +151,9 @@ const generateDie = (amount = 1) => {
 };
 
 const handleRollClick = () => {
+  const { rollBtn, endTurnBtn } = elements;
+  rollBtn.disabled = true;
+  endTurnBtn.disabled = true;
   resetDice();
   const activeDice = [...document.getElementsByTagName("ol")];
 
@@ -218,8 +221,8 @@ const getRotation = (value, oddEven) => {
 };
 
 const rollDice = (dice) => {
-  const forcedOn = true;
-  const forcedRoll = [1, 1, 1, 5, 5, 5];
+  const forcedOn = false;
+  const forcedRoll = [1, 1, 1, 1, 2, 4];
 
   return dice.map((die, index) => {
     const num = forcedOn ? forcedRoll[index] : getNumber(1, 6);
@@ -231,44 +234,13 @@ const rollDice = (dice) => {
 };
 
 const prepareForInput = (result) => {
-  const { rollBtn } = elements;
-  const scoringDie = evaluateRoll(result);
-  console.log("prepareForInput", scoringDie);
+  evaluateRoll(result);
+
   if (document.querySelectorAll(...[".selectable"]).length > 0) {
-    //rollBtn.disabled = true;
-    //addActionButtons(scoringDie);
     activateListeners();
   } else {
-    // processLosingTurn();
+    processLosingTurn();
   }
-};
-
-const addActionButtons = (scoringDie) => {
-  const { sets, singles } = scoringDie;
-  singles.forEach((die) => {
-    const { dieId } = die;
-
-    const current = document.getElementById(dieId);
-    const buttonContainer = current.querySelector(".action-btn-container");
-    const button = document.createElement("button");
-    button.classList.add("btn", "single-button");
-    button.textContent = "KEEP ONE";
-    buttonContainer.appendChild(button);
-    buttonContainer.style.opacity = "1";
-  });
-  sets.forEach((set) => {
-    set.forEach((s) => {
-      const { dieId } = s;
-
-      const current = document.getElementById(dieId);
-      const buttonContainer = current.querySelector(".action-btn-container");
-      const button = document.createElement("button");
-      button.classList.add("btn", "set-button");
-      button.textContent = "KEEP SET";
-      buttonContainer.appendChild(button);
-      buttonContainer.style.opacity = "1";
-    });
-  });
 };
 
 const activateListeners = () => {
@@ -280,23 +252,25 @@ const activateListeners = () => {
 };
 
 const evaluateRoll = (roll) => {
-  document
-    .querySelectorAll(...[".selectable"])
-    .forEach((s) => s.classList.remove("selectable", "selected"));
+  const values = roll.map((v) => v.value);
+  state.maxTotal = calculateSelectedTotal(values);
 
-  let matchedArray = [];
-  const scoringArray = [];
-  const sixDiceCheck = roll.length === 6 ? checkForSixDiceScore(roll) : null;
+  updateKeepAllButtonText();
+
+  const sixDiceCheck =
+    values.length === 6 ? checkForSixDiceScore(values) : null;
+
   if (sixDiceCheck) {
-    return { sets: [sixDiceCheck.set], value: sixDiceCheck.value, singles: [] };
+    return roll.forEach(({ dieId }) => {
+      makeDieSelectable(dieId);
+    });
   }
 
   const onesAndFives = roll.filter((r) => r.value === 1 || r.value === 5);
+
   onesAndFives.forEach(({ dieId }) => {
     makeDieSelectable(dieId);
   });
-
-  scoringArray.push(onesAndFives);
 
   roll.forEach((r) => {
     const matched = roll.filter((current) => {
@@ -308,17 +282,6 @@ const evaluateRoll = (roll) => {
       });
     }
   });
-
-  matchedArray = matchedArray.filter(
-    (thing, index, self) =>
-      index === self.findIndex((t) => t[0].value === thing[0].value)
-  );
-
-  scoringArray.push(...matchedArray);
-
-  console.log("scoringArray", scoringArray);
-
-  return [...matchedArray, ...onesAndFives];
 };
 
 const makeDieSelectable = (dieId) => {
@@ -340,13 +303,23 @@ const evaluateSelectedDice = () => {
     return parseInt(s.children[0].dataset.roll);
   });
 
-  console.log("values", values);
-  calculateSelectedTotal(values);
+  updateSelectedTotal(calculateSelectedTotal(values));
+  updateKeepSelectedButtonText(values.length);
 };
 
 const calculateSelectedTotal = (values) => {
   let total = 0;
-  updateSelectedTotal(total);
+
+  if (values.length === 0) {
+    return total;
+  }
+
+  const sixDiceMatch = checkForSixDiceScore(values);
+  if (values.length === 6 && sixDiceMatch) {
+    total += sixDiceMatch;
+
+    return total;
+  }
 
   const matches = checkForMatches(values);
   if (matches.length > 0) {
@@ -355,7 +328,10 @@ const calculateSelectedTotal = (values) => {
     });
 
     values.forEach((v) => {
-      if (v !== matches[0][0] && values.length < 6) {
+      if (
+        (v !== matches[0][0] && values.length < 6) ||
+        (v !== matches[0][0] && matches.length < 2)
+      ) {
         total += convertOnesAndFives(v);
       }
     });
@@ -364,7 +340,7 @@ const calculateSelectedTotal = (values) => {
       total += convertOnesAndFives(v);
     });
   }
-  updateSelectedTotal(total);
+  return total;
 };
 
 const convertOnesAndFives = (value) => {
@@ -380,6 +356,27 @@ const convertOnesAndFives = (value) => {
 
 const updateSelectedTotal = (newTotal) => {
   state.selectedTotal = newTotal;
+};
+
+const updateKeepSelectedButtonText = (length = 0) => {
+  const { keepSelectedBtn } = elements;
+
+  if (state.selectedTotal > 0) {
+    keepSelectedBtn.disabled = false;
+    keepSelectedBtn.textContent = `KEEP ${length} DICE FOR ${state.selectedTotal} POINTS`;
+  } else {
+    resetKeepSelectedBtn();
+  }
+};
+
+const updateKeepAllButtonText = () => {
+  const { keepAllBtn } = elements;
+  if (state.maxTotal > 0) {
+    keepAllBtn.disabled = false;
+    keepAllBtn.textContent = `KEEP MAX (${state.maxTotal})`;
+  } else {
+    resetKeepAllBtn();
+  }
 };
 
 const checkForMatches = (values) => {
@@ -406,36 +403,32 @@ const handleEndTurnClick = () => {
   processEndOfTurn();
 };
 
-const handleKeepSetButtonClick = (set, value) => {
-  const valueToAdd =
-    value === 0 ? calculateBankedValue(set[0].value, set.length) : value;
-
-  set.forEach((s) => {
-    moveDice(s);
-  });
-  addScoreToBank(valueToAdd);
+const handleKeepSelectedClick = () => {
+  const selected = Array.from(document.querySelectorAll(...[".selected"]));
+  selected.forEach((s) =>
+    moveDice(
+      s.getAttribute("id"),
+      s.getElementsByClassName("single-die")[0].dataset.roll
+    )
+  );
+  addScoreToBank(state.selectedTotal);
+  resetKeepSelectedBtn();
 };
 
-const handleKeepSingleButtonClick = (die) => {
-  const { value } = die;
-  let finalVal = 0;
-  switch (value) {
-    case 1:
-      finalVal = 100;
-      break;
-    case 5:
-      finalVal = 50;
-      break;
-    default:
-      finalVal = 0;
-  }
-  moveDice(die);
-  addScoreToBank(finalVal);
+const handleKeepAllClick = () => {
+  const selectable = Array.from(document.querySelectorAll(...[".selectable"]));
+  selectable.forEach((s) =>
+    moveDice(
+      s.getAttribute("id"),
+      s.getElementsByClassName("single-die")[0].dataset.roll
+    )
+  );
+  addScoreToBank(state.maxTotal);
+  resetKeepAllBtn();
 };
 
-const moveDice = (die) => {
-  const { dieId, value } = die;
-  const { bankDice, diceContainer, rollBtn } = elements;
+const moveDice = (dieId, value) => {
+  const { bankDice, diceContainer, rollBtn, endTurnBtn } = elements;
   const el = document.getElementById(dieId);
   const dieToAnimate = el.querySelector(".single-die");
 
@@ -449,7 +442,13 @@ const moveDice = (die) => {
 
       bankDice.appendChild(dieForBank);
       rollBtn.disabled = false;
-      diceContainer.childNodes.length === 0 && resetBoard();
+      if (document.querySelectorAll(...[".selectable"]).length === 0) {
+        resetActionButtons();
+      }
+      if (diceContainer.childNodes.length === 0) {
+        resetBoard();
+        endTurnBtn.disabled = false;
+      }
     },
   });
 };
@@ -517,17 +516,16 @@ const checkForMultiplier = (val, length) => {
 
 const checkForSixDiceScore = (set) => {
   if (checkForStraight(set)) {
-    return { set, value: 1500 };
-  } else if (checkForThreePair(set)) {
-    return { set, value: 1000 };
-  } else {
-    return false;
+    return 1500;
   }
+  if (checkForThreePair(set)) {
+    return 1000;
+  }
+  return false;
 };
 
 const checkForStraight = (set) => {
-  const input = set.map((s) => s.value);
-  const sorted = input.sort((a, b) => {
+  const sorted = set.sort((a, b) => {
     return a - b;
   });
   const criteria = [1, 2, 3, 4, 5, 6];
@@ -536,11 +534,11 @@ const checkForStraight = (set) => {
 };
 
 const checkForThreePair = (set) => {
-  const input = set.map((s) => s.value);
-  const sorted = input.sort((a, b) => {
+  const sorted = set.sort((a, b) => {
     return a - b;
   });
   return (
+    sorted.length === 6 &&
     sorted[0] === sorted[1] &&
     sorted[2] === sorted[3] &&
     sorted[4] === sorted[5]
@@ -579,9 +577,28 @@ const resetDice = () => {
   const containers = document.querySelectorAll(...[".single-die-container"]);
 
   containers.forEach((c, i) => {
-    c.removeEventListener("click", handleDieSelect);
+    c.removeEventListener("click", handleDieSelect, true);
+    c.classList.remove("selectable", "selected");
     c.setAttribute("id", `die-${i + 1}`);
   });
+};
+
+const resetKeepSelectedBtn = () => {
+  const { keepSelectedBtn } = elements;
+
+  keepSelectedBtn.textContent = "SELECT DICE TO KEEP";
+  keepSelectedBtn.disabled = true;
+};
+const resetKeepAllBtn = () => {
+  const { keepAllBtn } = elements;
+
+  keepAllBtn.textContent = "KEEP MAX ()";
+  keepAllBtn.disabled = true;
+};
+
+const resetActionButtons = () => {
+  resetKeepAllBtn();
+  resetKeepSelectedBtn();
 };
 
 const getNumber = (min, max) => {
@@ -613,11 +630,11 @@ const processLastChance = (score, player) => {
 };
 
 const resetBoard = () => {
-  const { bankDice, endTurnBtn, gameInfoContainer } = elements;
-
+  const { bankDice, endTurnBtn, rollBtn } = elements;
+  resetActionButtons();
   bankDice.replaceChildren();
+  rollBtn.disabled = false;
   endTurnBtn.disabled = true;
-  clearActionButtons();
   generateDie(6);
 };
 
@@ -658,4 +675,6 @@ const declareFinalWinner = () => {
   const name = player.querySelector(".player-name").textContent;
 
   alert(`${name} has won the game!`);
+
+  activateModal();
 };

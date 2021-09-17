@@ -4,9 +4,9 @@ button {
   border: 1px solid var(--font-color);
   border-radius: 4px;
   padding: 5px 20px;
-  width: fit-content;
   transition: all 200ms;
   cursor: pointer;
+  height: 2.5rem;
 }
 
 button:hover {

@@ -22,7 +22,24 @@
         <button id="end-turn-btn" disabled>BANK & END TURN</button>
       </div>
       <div class="scoreboard-container"></div>
-
+      <div class="action-btn-container">
+        <button
+          class="action-btn"
+          id="keep-selected-btn"
+          disabled
+          onclick="handleKeepSelectedClick()"
+        >
+          SELECT DICE TO KEEP
+        </button>
+        <button
+          class="action-btn"
+          id="keep-all-btn"
+          disabled
+          onclick="handleKeepAllClick()"
+        >
+          KEEP MAX
+        </button>
+      </div>
       <div class="dice-container"></div>
       <div class="roll-button-container">
         <button onclick="handleRollClick()" id="roll-btn">ROLL DICE</button>
