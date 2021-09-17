@@ -33,6 +33,10 @@ const generateScoreboard = (players = 1) => {
 
   scoreboardContainer.replaceChildren();
 
+  const scoreLimit = document.createElement("p");
+  scoreLimit.textContent = `Playing to ${localStorage.getItem("limit")}`;
+  scoreboardContainer.appendChild(scoreLimit);
+
   for (let i = 0; i < players; i++) {
     const player = document.createElement("div");
     player.classList.add("player-score-container");
@@ -51,10 +55,6 @@ const generateScoreboard = (players = 1) => {
     player.appendChild(score);
     scoreboardContainer.appendChild(player);
   }
-
-  const scoreLimit = document.createElement("p");
-  scoreLimit.textContent = `Playing to ${localStorage.getItem("limit")}`;
-  scoreboardContainer.appendChild(scoreLimit);
 
   gameInfoContainer.querySelector(".current-player").textContent = document
     .getElementById(`player-${state.currentPlayer}`)
@@ -154,6 +154,7 @@ const handleRollClick = () => {
   const { rollBtn, endTurnBtn } = elements;
   rollBtn.disabled = true;
   endTurnBtn.disabled = true;
+  resetActionButtons();
   resetDice();
   const activeDice = [...document.getElementsByTagName("ol")];
 
@@ -404,6 +405,7 @@ const handleEndTurnClick = () => {
 };
 
 const handleKeepSelectedClick = () => {
+  updateKeepAllButtonText();
   const selected = Array.from(document.querySelectorAll(...[".selected"]));
   selected.forEach((s) =>
     moveDice(
@@ -411,6 +413,17 @@ const handleKeepSelectedClick = () => {
       s.getElementsByClassName("single-die")[0].dataset.roll
     )
   );
+
+  const values = Array.from(
+    document.querySelectorAll(...[".selectable:not(.selected)"])
+  ).map((item) => {
+    return parseInt(item.querySelector(".single-die").dataset.roll);
+  });
+
+  console.log("values", values);
+  state.maxTotal = calculateSelectedTotal(values);
+  console.log("maxTotal", state.maxTotal);
+  updateKeepAllButtonText();
   addScoreToBank(state.selectedTotal);
   resetKeepSelectedBtn();
 };
