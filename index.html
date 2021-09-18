@@ -12,15 +12,18 @@
       <div class="game-info-container flex-column">
         <h1 class="current-player"></h1>
         <div class="bank-dice-container">
-          <h2>Banked Dice<span class="turn-score"></span></h2>
+          <h2>
+            Banked Dice
+            <div class="turn-score"></div>
+          </h2>
 
           <div class="bank-dice"></div>
         </div>
+        <div class="end-turn-container">
+          <button id="end-turn-btn" disabled>BANK & END TURN</button>
+        </div>
       </div>
 
-      <div class="end-turn-container">
-        <button id="end-turn-btn" disabled>BANK & END TURN</button>
-      </div>
       <div class="scoreboard-container"></div>
       <div class="action-btn-container">
         <button

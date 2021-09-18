@@ -18,7 +18,7 @@
 
   /* min-height: 220px; */
   align-items: center;
-  /* transition: transform 1s ease-out; */
+  transition: transform 0.5s ease-out;
 }
 
 .selected {
