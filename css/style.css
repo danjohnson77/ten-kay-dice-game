@@ -64,3 +64,17 @@ html {
   font-size: 2rem;
   padding: 0 3rem;
 }
+
+.info-display {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  align-items: center;
+  position: absolute;
+  top: 200px;
+  opacity: 0;
+}
+
+.info-text {
+  font-size: 2rem;
+}

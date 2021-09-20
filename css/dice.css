@@ -1,5 +1,6 @@
 .dice-container {
   align-items: center;
+  position: relative;
   display: grid;
   gap: 2rem;
   grid-template-columns: repeat(6, 1fr);
@@ -7,8 +8,6 @@
   justify-items: center;
   padding: 2rem;
   flex-grow: 1;
-  /* min-height: 500px; */
-  /* perspective: 4000px; */
 }
 
 .single-die-container {

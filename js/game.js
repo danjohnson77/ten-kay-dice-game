@@ -83,6 +83,18 @@ const activateModal = () => {
 
   layoutContainer.style.display = "none";
   modalContainer.style.display = "flex";
+  modalContainer.style.opacity = 1;
+};
+
+const animateModal = () => {
+  gsap.to(".modal-container", {
+    opacity: 0,
+    duration: 0.5,
+    ease: "power1.in",
+    onComplete: () => {
+      startNewGame();
+    },
+  });
 };
 
 const startNewGame = () => {
@@ -129,6 +141,7 @@ const isOdd = (num) => {
 const generateDie = (amount = 1) => {
   const { diceContainer } = elements;
   diceContainer.replaceChildren();
+
   for (let i = 0; i < amount; i++) {
     const dieContainer = document.createElement("div");
     dieContainer.classList.add("single-die-container");
@@ -187,7 +200,6 @@ const animateRoll = (result) => {
     const { x, y, z } = getRotation(value, oddEven);
 
     const tl = new TimelineMax();
-    const stagger = 1;
 
     tl.from(die, 1, { yPercent: -200, duration: 1, ease: "bounce.out" }, 0);
 
@@ -234,7 +246,7 @@ const getRotation = (value, oddEven) => {
 
 const rollDice = (dice) => {
   const forcedOn = false;
-  const forcedRoll = [1, 1, 1, 1, 2, 4];
+  const forcedRoll = [2, 3, 4, 2, 6, 6];
 
   return dice.map((die, index) => {
     const num = forcedOn ? forcedRoll[index] : getNumber(1, 6);
@@ -252,8 +264,40 @@ const prepareForInput = (result) => {
     activateListeners();
   } else {
     state.turnScore = 0;
-    animateDiceOut();
+    processLosingRoll();
   }
+};
+
+const processLosingRoll = () => {
+  renderInfoDisplay("END OF TURN");
+  animateDiceOut();
+};
+
+const renderInfoDisplay = (text) => {
+  const { diceContainer } = elements;
+
+  const infoDisplay = document.createElement("div");
+  const infoText = document.createElement("p");
+
+  infoDisplay.classList.add("info-display");
+  infoText.classList.add("info-text");
+
+  infoText.textContent = text;
+
+  infoDisplay.appendChild(infoText);
+  diceContainer.appendChild(infoDisplay);
+
+  animateInfoDisplay();
+};
+
+const animateInfoDisplay = () => {
+  const infoDisplay = document.querySelector(".info-display");
+
+  const tl = gsap.timeline();
+
+  tl.to(infoDisplay, { top: "-100px", duration: 1.5 });
+  tl.to(infoDisplay, { opacity: 1, duration: 0.75 }, "<");
+  tl.to(infoDisplay, { opacity: 0, duration: 0.75 }, ">");
 };
 
 const activateListeners = () => {
@@ -430,23 +474,18 @@ const removeDuplicates = (values) => {
 };
 
 const handleEndTurnClick = () => {
+  renderInfoDisplay(`Player ${state.currentPlayer} banked ${state.turnScore}`);
   animateTurnScore();
 };
 
 const animateTurnScore = () => {
-  console.log("coords", getPlayerScoreCoords());
-
   const { turnScore } = elements;
 
   const startingX = turnScore.getBoundingClientRect().x;
   const startingY = turnScore.getBoundingClientRect().y;
 
-  console.log("starting", startingX, startingY);
-
   const x = getPlayerScoreCoords().x - startingX;
   const y = getPlayerScoreCoords().y - startingY;
-  console.log("x", x);
-  console.log("y", y);
 
   gsap.set(turnScore, { x: "", y: "" });
 
@@ -505,42 +544,22 @@ const handleKeepAllClick = () => {
 const moveDice = (dieId, value) => {
   const { bankDice, diceContainer, rollBtn, endTurnBtn } = elements;
   const el = document.getElementById(dieId);
-  const tl = gsap.timeline();
+
   const dieForBank = createDieForBank(value);
 
-  tl.to(
-    el,
-    {
-      scale: 0,
-      ease: "power4.out",
-      onComplete: () => {
-        diceContainer.removeChild(el);
+  diceContainer.removeChild(el);
 
-        bankDice.appendChild(dieForBank);
-        dieForBank.style.transform = "";
-      },
-      duration: 1,
-    },
-    1
-  ).from(
-    dieForBank,
-    {
-      duration: 1,
-      scale: 0,
-      ease: "bounce",
-      onComplete: () => {
-        rollBtn.disabled = false;
-        if (document.querySelectorAll(...[".selectable"]).length === 0) {
-          resetActionButtons();
-        }
-        if (diceContainer.childNodes.length === 0) {
-          resetBoard();
-          endTurnBtn.disabled = false;
-        }
-      },
-    },
-    2
-  );
+  bankDice.appendChild(dieForBank);
+
+  rollBtn.disabled = false;
+  if (document.querySelectorAll(...[".selectable"]).length === 0) {
+    resetActionButtons();
+  }
+  if (diceContainer.childNodes.length === 0) {
+    resetBoard();
+    endTurnBtn.disabled = false;
+  }
+  dieForBank.style.transform = "";
 };
 
 const createDieForBank = (value) => {
@@ -658,6 +677,7 @@ const animateDiceOut = () => {
   gsap.to(allDice, {
     scale: 0,
     x: -window.innerWidth,
+
     stagger: 0.2,
     duration: 1.2,
     onComplete: () => {
@@ -707,6 +727,7 @@ const resetKeepSelectedBtn = () => {
   keepSelectedBtn.textContent = "SELECT DICE TO KEEP";
   keepSelectedBtn.disabled = true;
 };
+
 const resetKeepAllBtn = () => {
   const { keepAllBtn } = elements;
 
@@ -731,7 +752,6 @@ const processLastChance = (score, player) => {
     updateWinner(score, player);
   }
   state.lastTurnTaken.push(state.currentPlayer);
-  console.log("last Chance", state.lastTurnTaken);
 
   state.lastTurnTaken.forEach((item) => {
     const current = document.getElementById(`player-${item}`);
@@ -746,7 +766,7 @@ const processLastChance = (score, player) => {
 };
 
 const resetBoard = () => {
-  const { bankDice, endTurnBtn, rollBtn, diceContainer, turnScore } = elements;
+  const { bankDice, endTurnBtn, rollBtn, turnScore } = elements;
 
   resetActionButtons();
   bankDice.replaceChildren();
