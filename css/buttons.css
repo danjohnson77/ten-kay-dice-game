@@ -26,3 +26,23 @@ button:disabled {
   font-size: 0.75rem;
   width: fit-content;
 }
+
+.pulsing {
+  animation-duration: 0.75s;
+  animation-name: pulsing;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes pulsing {
+  50% {
+    transform: scale(1.05);
+
+    box-shadow: 0 0 5px #fff;
+  }
+  100% {
+    transform: scale(1);
+
+    box-shadow: none;
+  }
+}

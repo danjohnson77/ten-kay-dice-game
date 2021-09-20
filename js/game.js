@@ -86,42 +86,43 @@ const activateModal = () => {
   modalContainer.style.opacity = 1;
 };
 
-const animateModal = () => {
-  gsap.to(".modal-container", {
-    opacity: 0,
-    duration: 0.5,
-    ease: "power1.in",
-    onComplete: () => {
-      startNewGame();
-    },
-  });
-};
-
 const startNewGame = () => {
   localStorage.clear();
-  document.querySelector(".turn-score").textContent = "";
-  document.querySelector(".bank-dice").replaceChildren();
+
   const {
     playerNumberInput,
     scoreLimitInput,
     layoutContainer,
     modalContainer,
     rollBtn,
+    bankDice,
+    turnScore,
   } = elements;
+
+  turnScore.textContent = "";
+  bankDice.replaceChildren();
 
   if (
     validateInput(playerNumberInput.value, 1, 4) &&
     validateInput(scoreLimitInput.value, 50, 10000)
   ) {
-    localStorage.setItem("players", playerNumberInput.value);
-    localStorage.setItem("limit", scoreLimitInput.value);
+    gsap.to(modalContainer, {
+      opacity: 0,
+      duration: 0.5,
+      ease: "power1.in",
+      onComplete: () => {
+        localStorage.setItem("players", playerNumberInput.value);
+        localStorage.setItem("limit", scoreLimitInput.value);
 
-    modalContainer.style.display = "none";
-    layoutContainer.style.display = "grid";
-    rollBtn.disabled = false;
-    state = { ...initState, lastTurnTaken: [] };
+        modalContainer.style.display = "none";
+        layoutContainer.style.display = "grid";
+        rollBtn.disabled = false;
 
-    init();
+        state = { ...initState, lastTurnTaken: [] };
+
+        init();
+      },
+    });
   }
 };
 
@@ -139,8 +140,9 @@ const isOdd = (num) => {
 };
 
 const generateDie = (amount = 1) => {
-  const { diceContainer } = elements;
+  const { diceContainer, rollBtn, endTurnBtn } = elements;
   diceContainer.replaceChildren();
+  rollBtn.classList.add("pulsing");
 
   for (let i = 0; i < amount; i++) {
     const dieContainer = document.createElement("div");
@@ -173,9 +175,10 @@ const generateDie = (amount = 1) => {
 };
 
 const handleRollClick = () => {
-  const { rollBtn, endTurnBtn, diceContainer } = elements;
-  diceContainer.style.opacity = 1;
+  const { rollBtn, endTurnBtn } = elements;
+
   rollBtn.disabled = true;
+  rollBtn.classList.remove("pulsing");
   endTurnBtn.disabled = true;
   resetActionButtons();
   resetDice();
@@ -192,6 +195,8 @@ const animateRoll = (result) => {
 
     const die = document.getElementById(dieId).querySelector(".single-die");
 
+    const parent = die.parentNode;
+
     die.classList.toggle("even-roll");
     die.classList.toggle("odd-roll");
 
@@ -202,6 +207,8 @@ const animateRoll = (result) => {
     const tl = new TimelineMax();
 
     tl.from(die, 1, { yPercent: -200, duration: 1, ease: "bounce.out" }, 0);
+
+    tl.to(parent, 3, { opacity: 1, duration: 1, ease: "power4.out" }, 0);
 
     tl.to(
       die,
@@ -246,7 +253,7 @@ const getRotation = (value, oddEven) => {
 
 const rollDice = (dice) => {
   const forcedOn = false;
-  const forcedRoll = [2, 3, 4, 2, 6, 6];
+  const forcedRoll = [1, 2, 3, 4, 5, 6];
 
   return dice.map((die, index) => {
     const num = forcedOn ? forcedRoll[index] : getNumber(1, 6);
@@ -273,7 +280,7 @@ const processLosingRoll = () => {
   animateDiceOut();
 };
 
-const renderInfoDisplay = (text) => {
+const renderInfoDisplay = (text, callback = null, params = null) => {
   const { diceContainer } = elements;
 
   const infoDisplay = document.createElement("div");
@@ -287,15 +294,23 @@ const renderInfoDisplay = (text) => {
   infoDisplay.appendChild(infoText);
   diceContainer.appendChild(infoDisplay);
 
-  animateInfoDisplay();
+  animateInfoDisplay(callback, params);
 };
 
-const animateInfoDisplay = () => {
+const animateInfoDisplay = (callback, params) => {
+  const { diceContainer } = elements;
   const infoDisplay = document.querySelector(".info-display");
 
   const tl = gsap.timeline();
 
-  tl.to(infoDisplay, { top: "-100px", duration: 1.5 });
+  tl.to(infoDisplay, {
+    top: "-100px",
+    duration: 1.5,
+    onComplete: () => {
+      diceContainer.removeChild(infoDisplay);
+      callback && callback({ ...params });
+    },
+  });
   tl.to(infoDisplay, { opacity: 1, duration: 0.75 }, "<");
   tl.to(infoDisplay, { opacity: 0, duration: 0.75 }, ">");
 };
@@ -521,9 +536,8 @@ const handleKeepSelectedClick = () => {
     return parseInt(item.querySelector(".single-die").dataset.roll);
   });
 
-  console.log("values", values);
   state.maxTotal = calculateSelectedTotal(values);
-  console.log("maxTotal", state.maxTotal);
+
   updateKeepAllButtonText();
   addScoreToBank(state.selectedTotal);
   resetKeepSelectedBtn();
@@ -531,12 +545,14 @@ const handleKeepSelectedClick = () => {
 
 const handleKeepAllClick = () => {
   const selectable = Array.from(document.querySelectorAll(...[".selectable"]));
+  state.selectedTotal = state.maxTotal;
   selectable.forEach((s) =>
     moveDice(
       s.getAttribute("id"),
       s.getElementsByClassName("single-die")[0].dataset.roll
     )
   );
+
   addScoreToBank(state.maxTotal);
   resetKeepAllBtn();
 };
@@ -556,8 +572,15 @@ const moveDice = (dieId, value) => {
     resetActionButtons();
   }
   if (diceContainer.childNodes.length === 0) {
-    resetBoard();
     endTurnBtn.disabled = false;
+
+    renderInfoDisplay(
+      `${state.selectedTotal + state.turnScore} and rolling!!!`,
+      resetBoard,
+      {
+        rolling: true,
+      }
+    );
   }
   dieForBank.style.transform = "";
 };
@@ -593,13 +616,8 @@ const updateOverallScore = () => {
   const newScore = parseInt(scoreDisplay.textContent) + state.turnScore;
 
   scoreDisplay.textContent = newScore;
-  console.log(
-    "winning score reached",
-    state.winningScoreReached,
-    state.winningScore
-  );
+
   if (state.winningScoreReached) {
-    console.log("processLastChance called");
     processLastChance(newScore, currentPlayer);
   }
 
@@ -765,15 +783,15 @@ const processLastChance = (score, player) => {
   }
 };
 
-const resetBoard = () => {
-  const { bankDice, endTurnBtn, rollBtn, turnScore } = elements;
+const resetBoard = (params = null) => {
+  const { bankDice, rollBtn, turnScore, endTurnBtn } = elements;
 
   resetActionButtons();
   bankDice.replaceChildren();
   turnScore.style = "";
-
+  endTurnBtn.disabled = params?.rolling ? false : true;
   rollBtn.disabled = false;
-  endTurnBtn.disabled = true;
+
   generateDie(6);
 };
 
