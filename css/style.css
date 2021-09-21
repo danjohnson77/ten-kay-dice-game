@@ -4,77 +4,10 @@
 @import "./layout.css";
 @import "./dice.css";
 @import "./modal.css";
+@import "./responsive.css";
 
 html {
   font-family: var(--main-font);
   color: var(--font-color);
   background: var(--bg-color);
-}
-
-.bank {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 150px;
-}
-
-.turn-score {
-  padding: 1rem;
-  font-size: 2rem;
-  display: inline-block;
-}
-
-.bank-dice-container {
-  display: flex;
-  flex-direction: column;
-
-  width: 100%;
-  min-height: 85px;
-}
-
-.bank-dice {
-  display: flex;
-  width: 100%;
-
-  min-height: 50px;
-}
-
-.bank-dice > .die-side {
-  height: 1.5rem;
-  width: 1.5rem;
-  margin: 0.5rem;
-  padding: 0.25rem;
-  grid-column: auto;
-  grid-row: auto;
-  transform: none;
-}
-
-.bank-dice > .die-side > .dot {
-  height: 0.5rem;
-  width: 0.5rem;
-}
-
-.player-score-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.player-score {
-  font-size: 2rem;
-  padding: 0 3rem;
-}
-
-.info-display {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  align-items: center;
-  position: absolute;
-  top: 200px;
-  opacity: 0;
-}
-
-.info-text {
-  font-size: 2rem;
 }

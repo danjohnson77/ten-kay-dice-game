@@ -33,9 +33,9 @@ const generateScoreboard = (players = 1) => {
 
   scoreboardContainer.replaceChildren();
 
-  const scoreLimit = document.createElement("p");
-  scoreLimit.textContent = `Playing to ${localStorage.getItem("limit")}`;
-  scoreboardContainer.appendChild(scoreLimit);
+  // const scoreLimit = document.createElement("p");
+  // scoreLimit.textContent = `Playing to ${localStorage.getItem("limit")}`;
+  // scoreboardContainer.appendChild(scoreLimit);
 
   for (let i = 0; i < players; i++) {
     const player = document.createElement("div");
@@ -742,7 +742,7 @@ const resetDice = () => {
 const resetKeepSelectedBtn = () => {
   const { keepSelectedBtn } = elements;
 
-  keepSelectedBtn.textContent = "SELECT DICE TO KEEP";
+  keepSelectedBtn.textContent = "KEEP SELECTED";
   keepSelectedBtn.disabled = true;
 };
 
