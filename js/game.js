@@ -11,6 +11,8 @@ const elements = {
   gameInfoContainer: document.querySelector(".game-info-container"),
   layoutContainer: document.querySelector(".layout-container"),
   modalContainer: document.querySelector(".modal-container"),
+  navContainer: document.querySelector(".nav-container"),
+  victoryContainer: document.querySelector(".victory-container"),
   playerNumberInput: document.getElementById("numberOfPlayers"),
   scoreLimitInput: document.getElementById("scoreLimit"),
 };
@@ -33,9 +35,10 @@ const generateScoreboard = (players = 1) => {
 
   scoreboardContainer.replaceChildren();
 
-  // const scoreLimit = document.createElement("p");
-  // scoreLimit.textContent = `Playing to ${localStorage.getItem("limit")}`;
-  // scoreboardContainer.appendChild(scoreLimit);
+  const scoreLimit = document.createElement("p");
+  scoreLimit.textContent = `Playing to ${localStorage.getItem("limit")}`;
+  scoreLimit.classList.add("score-limit");
+  scoreboardContainer.appendChild(scoreLimit);
 
   for (let i = 0; i < players; i++) {
     const player = document.createElement("div");
@@ -82,6 +85,7 @@ const activateModal = () => {
   const { layoutContainer, modalContainer } = elements;
 
   layoutContainer.style.display = "none";
+
   modalContainer.style.display = "flex";
   modalContainer.style.opacity = 1;
 };
@@ -283,6 +287,10 @@ const processLosingRoll = () => {
 const renderInfoDisplay = (text, callback = null, params = null) => {
   const { diceContainer } = elements;
 
+  if (diceContainer.querySelector(".info-display")) {
+    diceContainer.removeChild(diceContainer.querySelector(".info-display"));
+  }
+
   const infoDisplay = document.createElement("div");
   const infoText = document.createElement("p");
 
@@ -307,7 +315,6 @@ const animateInfoDisplay = (callback, params) => {
     top: "-100px",
     duration: 1.5,
     onComplete: () => {
-      diceContainer.removeChild(infoDisplay);
       callback && callback({ ...params });
     },
   });
@@ -489,6 +496,8 @@ const removeDuplicates = (values) => {
 };
 
 const handleEndTurnClick = () => {
+  const { rollBtn } = elements;
+  rollBtn.disabled = true;
   renderInfoDisplay(`Player ${state.currentPlayer} banked ${state.turnScore}`);
   animateTurnScore();
 };
@@ -715,7 +724,8 @@ const processEndOfTurn = () => {
 
   if (
     state.winningScoreReached &&
-    state.winningPlayer !== state.currentPlayer
+    state.winningPlayer !== state.currentPlayer &&
+    getCurrentPlayer()
   ) {
     getCurrentPlayer().style.color = "#a6a6a6";
   }
@@ -820,7 +830,10 @@ const declareFinalWinner = () => {
 
   const name = player.querySelector(".player-name").textContent;
 
-  alert(`${name} has won the game!`);
+  animateFinalWinner(name);
+};
 
+const animateFinalWinner = (name) => {
+  alert(`${name} WINS!!!!`);
   activateModal();
 };

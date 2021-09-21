@@ -34,6 +34,13 @@
   .bank-dice-container {
     font-size: 0.75rem;
     min-height: 50px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .bank-dice {
+    justify-content: center;
   }
 
   .scoreboard-container {
@@ -45,8 +52,26 @@
     font-size: 0.75rem;
   }
 
+  .score-limit {
+    grid-column: 1 / 3;
+    grid-row: 3;
+    text-align: center;
+    margin: 1rem 0;
+  }
+
   .player-score {
     font-size: 1rem;
+    padding: 0;
+  }
+
+  .turn-score {
+    font-size: 1.5rem;
+  }
+
+  .player-score-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
   }
 
   .dice-container {
@@ -80,5 +105,18 @@
 
     display: flex;
     justify-content: center;
+  }
+
+  .victory-container {
+    justify-content: center;
+  }
+
+  .victory-container > h1 {
+    font-size: 1.5rem;
+  }
+
+  .victory-container > .nav-container {
+    justify-content: space-around;
+    width: 100%;
   }
 }

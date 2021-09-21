@@ -22,7 +22,8 @@ button:disabled {
   opacity: 30%;
 }
 
-.nav-container > button {
+.nav-container > button,
+.nav-container > a {
   font-size: 0.75rem;
   width: fit-content;
 }
